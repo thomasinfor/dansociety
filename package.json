@@ -1,11 +1,10 @@
 {
-  "name": "express",
+  "name": "dansociety",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node main.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -16,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/thomasinfor/dansociety/issues"
   },
-  "homepage": "https://github.com/thomasinfor/dansociety#readme"
+  "homepage": "https://github.com/thomasinfor/dansociety#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
