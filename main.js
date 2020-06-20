@@ -1,6 +1,6 @@
 const express=require('express');
 
-const port=8080;
+const port=3000;
 const app=new express();
 
 app.get('/', function(req, res){
