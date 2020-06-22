@@ -595,12 +595,22 @@ pre code {
   }
 }
 .row {
+  padding-top: 40px;
   display: flex;
   flex-wrap: wrap;
   margin-right: -0.75rem;
   margin-left: -0.75rem;
 }
-
+.row:before {
+  display: table;
+  content: " ";
+  clear: both;
+}
+.row:after {
+  display: table;
+  content: " ";
+  clear: both;
+}
 .no-gutters {
   margin-right: 0;
   margin-left: 0;
@@ -10396,19 +10406,26 @@ a.navbar-brand > img:nth-child(2){display: none;}
   .intro > h2{font-size: 8vw;}
   .fn-1{font-size: 6vw!important;}
   .fn-2{font-size: 6vw!important;}
-  .fn-3{font-size: 5vw!important;}
+  .fn-3{font-size: 4.5vw!important;}
 }
 @media (max-width: 500px){
   .masthead h2{font-size: 3.5vw;}
 }
 #about > div > div > p{margin: 0;}
 .function-section{
-  min-height: 100vh;
   padding-top: 80px;
+  min-height: 100vh;
 }
-.fn-1{font-size: 30px;width: 95%;margin-top: 20px;}
-.fn-2{font-size: 30px;width: 95%;}
-.fn-3{font-size: 25px;width: 95%;}
+.fn-1{font-size: 30px;/*width: 95%;*/}
+.fn-2{font-size: 30px;/*width: 95%;*/}
+.fn-3{font-size: 25px;/*width: 95%;*/}
 #signup .container{
   position: absolute;top: 50%;left: 50%;width: 100%;transform: translate(-50%,-50%);
+}
+.function-box{padding: 20px;position: relative;width: 90%;box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);margin: 20px 0;}
+@media (min-width: 992px){
+  .fn-1{margin-top: 0;}
+  .function-box{height: 40vw;}
+  .left{position: absolute;left: 25%;top: 50%;width: 40%;transform: translate(-50%,-50%);}
+  .right{position: absolute;left: 75%;top: 50%;width: 40%;transform: translate(-50%,-50%);}
 }
