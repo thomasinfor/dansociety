@@ -10324,8 +10324,8 @@ a.navbar-brand > img:nth-child(2){display: none;}
 .signup-section {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.5) 75%, #000000 100%), url("./assets/img/bg-signup.jpg");
-  background-position: center;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.5) 75%, #000000 100%), url("./images/subscribe.png");
+  background-position: top;
   background-repeat: no-repeat;
   background-attachment: scroll;
   background-size: cover;
@@ -10337,13 +10337,14 @@ a.navbar-brand > img:nth-child(2){display: none;}
   font-family: "Varela Round", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-size: 80%;
   text-transform: uppercase;
-  letter-spacing: 0.15rem;
+  letter-spacing: 0.05rem;
   border: 0;
 }
 
 .team-section {
   min-height: 100vh;
   padding-top: 80px;
+  padding-bottom: 30px;
 }
 .team-section .card {
   border: 0;
@@ -10426,6 +10427,11 @@ a.navbar-brand > img:nth-child(2){display: none;}
 @media (min-width: 992px){
   .fn-1{margin-top: 0;}
   .function-box{height: 40vw;}
-  .left{position: absolute;left: 25%;top: 50%;width: 40%;transform: translate(-50%,-50%);}
-  .right{position: absolute;left: 75%;top: 50%;width: 40%;transform: translate(-50%,-50%);}
+  .left{position: absolute;left: 25%;top: 50%;width: 45%;transform: translate(-50%,-50%);}
+  .right{position: absolute;left: 75%;top: 50%;width: 45%;transform: translate(-50%,-50%);}
+  .leftt{position: absolute;left: 20%;top: 50%;width: 35%;transform: translate(-50%,-50%);}
+  .rightt{position: absolute;left: 70%;top: 50%;width: 55%;transform: translate(-50%,-50%);}
 }
+.details{transition: 0.5s;width: 100%;position: absolute;top: 0;left: 0;height: 100%;}
+/*.member{display: none;}*/
+.seperate{width: 90%!important;border-width: 2px!important;}
