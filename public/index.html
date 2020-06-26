@@ -78,9 +78,9 @@
         <div class="col-md-10 col-lg-8 mx-auto text-center">
           <i class="far fa-paper-plane fa-2x mb-2 text-white"></i>
           <h2 class="text-white mb-5">Subscribe to receive updates!</h2>
-          <form class="form-inline d-flex" action="./subscribe" method="post">
-            <input class="form-control flex-fill mr-0 mr-sm-2 mb-3 mb-sm-0" id="email" placeholder="Enter email address...">
-            <button class="btn btn-primary mx-auto" type="submit">Subscribe</button>
+          <form class="form-inline d-flex">
+            <input class="form-control flex-fill mr-0 mr-sm-2 mb-3 mb-sm-0" name="email" placeholder="Enter email address..." id="email">
+            <button class="btn btn-primary mx-auto" id="submit-btn">Subscribe</button>
           </form>
         </div>
       </div>
@@ -171,19 +171,5 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
   <!-- Core theme JS-->
   <script src="./scripts.js"></script>
-  <script>
-    function show(){
-        console.log(this);
-        this.nextElementSibling.style.height='100%';
-    }
-    function hide(x){
-        console.log(x);
-        this.nextElementSibling.style.height='0';
-    }
-    for(var i of document.getElementsByClassName('member')){
-      i.onmouseover=show;
-      i.onmouseout=hide;
-    }
-  </script>
 </body>
 </html>
