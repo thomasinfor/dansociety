@@ -60,6 +60,7 @@ function init_camera(){
       cnt--;
       id=setInterval(()=>{
         if(cnt==0){
+          start.addEventListener('click',startfunction);
           mediaRecorder.start();
           document.getElementById('model').play();
           document.getElementById('btnStart').style.display='none';
@@ -73,12 +74,13 @@ function init_camera(){
       },1000)
     }
     start.addEventListener('click',startfunction);
-    stop.addEventListener('click', (ev)=>{
+    var stopfunction=(ev)=>{
       mediaRecorder.stop();
       document.getElementById('model').pause();
       document.getElementById('model').load();
       console.log(mediaRecorder.state);
-    });
+    }
+    stop.addEventListener('click', stopfunction);
     document.getElementById('btnAgain').addEventListener('click', (ev)=>{
       window.location.reload();
     });
@@ -99,6 +101,7 @@ function init_camera(){
     vidSave.onplay=()=>{model.play();};
     vidSave.onpause=()=>{model.pause();};
     vidSave.ontimeupdate=()=>{model.currentTime=vidSave.currentTime;}
+    model.onended=stopfunction;
   })
   .catch(function(err) { 
     console.log(err.name, err.message); 
