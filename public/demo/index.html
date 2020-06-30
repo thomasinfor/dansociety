@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DEMO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
+  <script src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+<style>
+*{font-family: 'Open Sans', 'Noto Sans TC';}
+body,html{height: 100%; color: black!important;scroll-behavior: smooth;}
+body{width: 100%;margin: 0;padding: 0;}
+/*#package{overflow-x: scroll;}*/
+.page{width: 100%;height: 100vh;margin-bottom: 10vh;}
+#discription{}
+#video{position: relative;}
+#take-picture{position: relative;}
+#record{position: relative;}
+#estimate{position: relative;}
+#capture{display: none;}
+.button{/*position: absolute;bottom: 8%;left: 50%;transform: translate(-50%,-50%);*/background-color: #ccc;padding: 15px 30px;border-radius: 10px;cursor: pointer;}
+.button:hover{background-color: #aaa;}
+.step{position: absolute;left: 5%;top: 5%;width: 20%;font-size: 50px;}
+#camera,#capture{position: absolute;top: 50%;width: 45%;left: 75%;transform: translate(-50%,-50%);}
+#model{position: absolute;top: 50%;width: 45%;left: 25%;transform: translate(-50%,-50%);}
+#video-input{position: absolute;top: 10%;width: 65%;left: 60%;transform: translateX(-50%);}
+#speed-control{position: absolute;bottom: 10%;left: 50%;transform: translate(-50%,-50%);}
+#record > .button{position: absolute;bottom: 5%;left: 5%;}
+#estimate > .button{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);}
+@media only screen and (max-width: 800px){
+  center{display :none;}
+  #notice{display: block!important}
+}
+#webcam-js{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);width: 80%;height: 80%;}
+#take-picture > .button-block{position: absolute;bottom: 5%;left: 5%;}
+</style>
+</head>
+<body><center>
+  <div id="package">
+    <div class="page" id="description">
+      <div class="step">STEP 1</div>
+    </div>
+    <div class="page" id="take-picture">
+      <div class="step">STEP 2</div>
+      <video id="webcam" autoplay playsinline id="webcam-js"></video>
+      <canvas id="canvas" class="d-none"></canvas>
+      <img id="snap-img"></img>
+      <div class="button-block">
+        <div class="button" id="snap-start" style="display: block;">START</div>
+        <div class="button" id="snap-snap" style="display: none;">TAKE A SNAP</div>
+        <div class="button" id="snap-done" style="display: none;">DONE</div>
+      </div>
+      <script src="webcam.js"></script>
+    </div>
+    <div class="page" id="video">
+      <div class="step">STEP 3</div>
+      <video id="video-input" src="demo-video.mp4" controls>
+        <!-- <source src="./dance.mp4" type="video/mp4"> -->
+        Your browser does not support the video tag.
+      </video>
+      <div id="speed-control">
+        <input id="speed-slide" type="range" min="10" max="100" value="100">
+        <div>playback speed: <span id="speed">1.00</span>x</div>
+      </div>
+    </div>
+    <div class="page" id="record">
+      <div class="step">STEP 4</div>
+      <video id="model" src="demo-video.mp4" style="display: none;"></video>
+      <video id="camera" style="display: none;"></video>
+      <video id="capture" style="display: none;" controls></video><br>
+      <div class="button" id="btnStart" style="display: block">START</div>
+      <div class="button" id="btnStop" style="display: none;">STOP</div>
+      <div class="button" id="btnAgain" style="display: none;">RETRY</div>
+      <script src="./camera.js"></script>
+    </div>
+    <div class="page" id="estimate">
+      <div class="step">STEP 5</div>
+      <div class="button" onclick="estimate();">evaluate</div>
+      <div id="score"></div>
+    </div>
+  </div>
+  <script>
+    function estimate(){
+      const net = posenet.load({
+        architecture: 'ResNet50',
+        outputStride: 32,
+        inputResolution: { width: 257, height: 200 },
+        quantBytes: 2
+      }).then((net)=>{
+        const pose1 = net.estimateSinglePose(document.getElementById('video-input'),{
+          flipHorizontal: true
+        });
+        const pose2 = net.estimateSinglePose(document.getElementById('capture'),{
+          flipHorizontal: true
+        });
+        return compare(pose1,pose2);
+      }).then((pose)=>{
+        document.getElementById('score').innerHTML=pose;
+      })
+    }
+    const speed=document.getElementById('speed');
+    const videoinput=document.getElementById('video-input');
+    document.getElementById('speed-slide').oninput=function(){
+      speed.innerHTML=String(parseFloat(this.value/100).toFixed(2));
+      videoinput.playbackRate=this.value/100;
+    }
+  </script>
+</center>
+<h1 id="notice" style="display: none;text-align: center;">! Not Available on Phone yet !</h1>
+</body>
+</html>
