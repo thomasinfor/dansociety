@@ -1,6 +1,7 @@
+var x;
 function init_camera(){
   let constraintObj = { 
-    audio: false, 
+    audio: true, 
     video: { 
       facingMode: "user", 
       width: { min: 640, ideal: 1280, max: 1920 },
@@ -33,7 +34,6 @@ function init_camera(){
 
   navigator.mediaDevices.getUserMedia(constraintObj)
   .then(function(mediaStreamObj) {
-    console.log('here');
     let video = document.querySelector('#camera');
     if ("srcObject" in video) {
       video.srcObject = mediaStreamObj;

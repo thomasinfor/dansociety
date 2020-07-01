@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
-  <script src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
-  <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <link href="https://vjs.zencdn.net/7.8.3/video-js.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
@@ -25,7 +23,7 @@ body{width: 100%;margin: 0;padding: 0;}
 #capture{display: none;}
 .button{/*position: absolute;bottom: 8%;left: 50%;transform: translate(-50%,-50%);*/background-color: #ccc;padding: 15px 30px;border-radius: 10px;cursor: pointer;}
 .button:hover{background-color: #aaa;}
-.step{position: absolute;left: 10%;top: 5%;width: 20%;font-size: 40px;}
+.step{position: absolute;left: 10%;top: 5%;width: 80%;text-align: left;font-size: 40px;}
 #camera{position: absolute;top: 50%;width: 45%;left: 75%;transform: translate(-50%,-50%) scale(-1, 1);}
 #capture{transform: scale(-1, 1);width: 100%;}
 #capture-block{position: absolute;top: 50%;width: 45%;left: 75%;transform: translate(-50%,-50%);}
@@ -34,15 +32,14 @@ body{width: 100%;margin: 0;padding: 0;}
 #speed-control{position: absolute;bottom: 5%;left: 50%;transform: translate(-50%,-50%);}
 #record > .button{position: absolute;bottom: 5%;left: 10%;}
 #estimate > .button{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);}
-@media only screen and (max-width: 800px){
+/*@media only screen and (max-width: 800px){
   center{display :none;}
   #notice{display: block!important}
-}
+}*/
 #take-picture > .button-block{position: absolute;bottom: 5%;left: 10%;}
 .button-block > .button{margin-top: 20px;}
 .d-none{display: none;}
-#webcam-js{position: absolute;top: 50%;left: 60%;transform: translate(-50%,-50%) scale(-1, 1)!important;height: 60%!important;}
-#snap-img{position: absolute;top: 50%;left: 60%;transform: translate(-50%,-50%);height: 60%;}
+#webcam-js,#snap-img{position: absolute;top: 50%;left: 60%;transform: translate(-50%,-50%) scale(-1, 1);max-height: 60%;max-width: 60%;}
 #estimate{margin-bottom: 0!important;}
 img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
 </style>
@@ -58,7 +55,7 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
       <canvas id="canvas" class="d-none"></canvas>
       <img id="snap-img"></img>
       <div class="button-block">
-        <div class="button" id="snap-start" style="display: block;">TAKE A SNAP</div>
+        <div class="button" id="snap-start" style="display: block;">TAKE A SNAPSHOT</div>
         <div class="button" id="snap-retry" style="display: none;">RETRY</div>
         <div class="button" id="snap-done" style="display: none;">DONE</div>
       </div>
