@@ -2,18 +2,18 @@ const webcamElement = document.getElementById('webcam-js');
 const canvasElement = document.getElementById('canvas');
 const webcam = new Webcam(webcamElement, 'user', canvasElement);
 function snap_start(){
-  document.getElementById('snap-start').removeEventListener('click',snap_start);
   document.getElementById('webcam-js').style.display='block';
   document.getElementById('snap-retry').style.display='none';
   document.getElementById('snap-done').style.display='none';
   document.getElementById('snap-img').style.display='none';
+  document.getElementById('snap-start').removeEventListener('click',snap_start);
   webcam.start().then(result=>{
     console.log("webcam started");
   }).catch(err => {
     console.log(err);
   });
   var cnt=6,id;
-  document.getElementById('snap-start').innerHTML=`START IN ${cnt-1}s`;
+  document.getElementById('snap-start').innerHTML=`SNAP IN ${cnt-1}s`;
   cnt--;
   id=setInterval(()=>{
     if(cnt==0){
@@ -22,7 +22,7 @@ function snap_start(){
       document.getElementById('snap-start').style.display='none';
       clearInterval(id);
     }else{
-      document.getElementById('snap-start').innerHTML=`START IN ${cnt-1}s`;
+      document.getElementById('snap-start').innerHTML=`SNAP IN ${cnt-1}s`;
       cnt--;
     }
   },1000);
@@ -48,6 +48,6 @@ function snap_done(){
   submit_img(document.getElementById('snap-img'));
   document.getElementById('video').scrollIntoView();
 }
-document.getElementById('snap-start').onclick=snap_start;
+document.getElementById('snap-start').addEventListener('click',snap_start);
 document.getElementById('snap-retry').onclick=snap_retry;
 document.getElementById('snap-done').onclick=snap_done;

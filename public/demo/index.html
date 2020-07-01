@@ -6,6 +6,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
   <script src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
+  <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="https://vjs.zencdn.net/7.8.3/video-js.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
 <style>
@@ -22,10 +25,12 @@ body{width: 100%;margin: 0;padding: 0;}
 #capture{display: none;}
 .button{/*position: absolute;bottom: 8%;left: 50%;transform: translate(-50%,-50%);*/background-color: #ccc;padding: 15px 30px;border-radius: 10px;cursor: pointer;}
 .button:hover{background-color: #aaa;}
-.step{position: absolute;left: 10%;top: 5%;width: 20%;font-size: 50px;}
-#camera,#capture{position: absolute;top: 50%;width: 45%;left: 75%;transform: translate(-50%,-50%);}
+.step{position: absolute;left: 10%;top: 5%;width: 20%;font-size: 40px;}
+#camera{position: absolute;top: 50%;width: 45%;left: 75%;transform: translate(-50%,-50%) scale(-1, 1);}
+#capture{transform: scale(-1, 1);width: 100%;}
+#capture-block{position: absolute;top: 50%;width: 45%;left: 75%;transform: translate(-50%,-50%);}
 #model{position: absolute;top: 50%;width: 45%;left: 25%;transform: translate(-50%,-50%);}
-#video-input{position: absolute;top: 10%;width: 65%;left: 60%;transform: translateX(-50%);max-height: 70%;max-width: 60%;}
+#video-input{position: absolute;top: 45%;width: 65%;left: 60%;transform: translate(-50%,-50%);max-height: 70%;max-width: 60%;}
 #speed-control{position: absolute;bottom: 5%;left: 50%;transform: translate(-50%,-50%);}
 #record > .button{position: absolute;bottom: 5%;left: 10%;}
 #estimate > .button{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);}
@@ -39,28 +44,28 @@ body{width: 100%;margin: 0;padding: 0;}
 #webcam-js{position: absolute;top: 50%;left: 60%;transform: translate(-50%,-50%) scale(-1, 1)!important;height: 60%!important;}
 #snap-img{position: absolute;top: 50%;left: 60%;transform: translate(-50%,-50%);height: 60%;}
 #estimate{margin-bottom: 0!important;}
-/*#camera{-o-transform: scaleX(-1);-moz-transform: scaleX(-1);-webkit-transform : scaleX(-1);-ms-transform: scaleX(-1);transform: scaleX(-1);}*/
+img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
 </style>
 </head>
 <body><center>
   <div id="package">
     <div class="page" id="description">
-      <div class="step">STEP 1</div>
+      <div class="step"></div>
     </div>
     <div class="page" id="take-picture">
-      <div class="step">STEP 2</div>
-      <video autoplay playsinline id="webcam-js"></video>
+      <div class="step">STEP 1</div>
+      <video autoplay playsinline id="webcam-js" class="flip"></video>
       <canvas id="canvas" class="d-none"></canvas>
       <img id="snap-img"></img>
       <div class="button-block">
-        <div class="button" id="snap-start" style="display: block;">START</div>
+        <div class="button" id="snap-start" style="display: block;">TAKE A SNAP</div>
         <div class="button" id="snap-retry" style="display: none;">RETRY</div>
         <div class="button" id="snap-done" style="display: none;">DONE</div>
       </div>
       <script src="webcam.js"></script>
     </div>
     <div class="page" id="video">
-      <div class="step">STEP 3</div>
+      <div class="step">STEP 2</div>
       <video id="video-input" src="./demo-video.mp4" controls>
         <!-- <source src="./dance.mp4" type="video/mp4"> -->
         Your browser does not support the video tag.
@@ -71,17 +76,19 @@ body{width: 100%;margin: 0;padding: 0;}
       </div>
     </div>
     <div class="page" id="record">
-      <div class="step">STEP 4</div>
+      <div class="step">STEP 3</div>
       <video id="model" src="./demo-video.mp4" style="display: block;"></video>
-      <video id="camera" style="display: block;"></video>
-      <video id="capture" style="display: none;" controls></video><br>
+      <video id="camera" style="display: block;" class="flip"></video>
+      <div id="capture-block" style="display: none;">
+        <video id="capture" class="flip" style="display: block;"></video>
+      </div>
       <div class="button" id="btnStart" style="display: block">START</div>
       <div class="button" id="btnStop" style="display: none;">STOP</div>
       <div class="button" id="btnAgain" style="display: none;">RETRY</div>
       <script src="./camera.js"></script>
     </div>
     <div class="page" id="estimate">
-      <div class="step">STEP 5</div>
+      <div class="step">STEP 4</div>
       <div class="button" onclick="estimate();">evaluate</div>
       <div id="score"></div>
     </div>

@@ -50,20 +50,24 @@ function init_camera(){
     let vidSave = document.getElementById('capture');
     let mediaRecorder = new MediaRecorder(mediaStreamObj);
     let chunks = [];
-    
+    var model=document.getElementById('model');
     var startfunction=(ev)=>{
+      model.currentTime=0;
+      model.controls=false;
       document.getElementById('camera').style.display='block';
       document.getElementById('model').style.display='block';
       start.removeEventListener('click',startfunction);
       var cnt=6,id;
       document.getElementById('btnStart').innerHTML=`START IN ${cnt-1}s`;
+      model.onended=stopfunction;
       cnt--;
       id=setInterval(()=>{
         if(cnt==0){
           start.addEventListener('click',startfunction);
           mediaRecorder.start();
-          document.getElementById('model').play();
+          document.getElementById('model').play().catch((e)=>{console.log(e);});
           document.getElementById('btnStart').style.display='none';
+          document.getElementById('btnStart').innerHTML='START';
           document.getElementById('btnStop').style.display='block';
           console.log(mediaRecorder.state);
           clearInterval(id);
@@ -76,32 +80,38 @@ function init_camera(){
     start.addEventListener('click',startfunction);
     var stopfunction=(ev)=>{
       mediaRecorder.stop();
-      document.getElementById('model').pause();
-      document.getElementById('model').load();
+      model.pause();
+      model.onended=()=>{};
+      model.currentTime=0;
+      model.controls=true;
       console.log(mediaRecorder.state);
     }
     stop.addEventListener('click', stopfunction);
     document.getElementById('btnAgain').addEventListener('click', (ev)=>{
-      window.location.reload();
+      model.pause();
+      model.currentTime=0;
+      start.style.display='block';
+      model.controls=false;
+      document.getElementById('camera').style.display='block';
+      document.getElementById('capture-block').style.display='none';
+      document.getElementById('btnAgain').style.display='none';
     });
     mediaRecorder.ondataavailable = function(ev) {
       chunks.push(ev.data);
     }
-    mediaRecorder.onstop = (ev)=>{
+    mediaRecorder.onstop=(ev)=>{
       let blob = new Blob(chunks, { 'type' : 'video/mp4;' });
       chunks = [];
       let videoURL = window.URL.createObjectURL(blob);
       vidSave.src = videoURL;
-      vidSave.style.display='block';
+      document.getElementById('capture-block').style.display='block';
       video.style.display='none';
       document.getElementById('btnStop').style.display='none';
       document.getElementById('btnAgain').style.display='block';
     }
-    var model=document.getElementById('model');
-    vidSave.onplay=()=>{model.play();};
-    vidSave.onpause=()=>{model.pause();};
-    vidSave.ontimeupdate=()=>{model.currentTime=vidSave.currentTime;}
-    model.onended=stopfunction;
+    model.onplay=()=>{vidSave.play().catch((e)=>{console.log(e);});};
+    model.onpause=()=>{vidSave.pause();};
+    model.ontimeupdate=()=>{vidSave.currentTime=model.currentTime;}
   })
   .catch(function(err) { 
     console.log(err.name, err.message); 
