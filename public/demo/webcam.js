@@ -32,8 +32,8 @@ function snap_snap(){
   webcam.stop();
   document.getElementById('snap-img').src=picture;
   document.getElementById('snap-img').style.display='block';
-  document.getElementById('snap-img').style.width=document.getElementById('webcam-js').width+'px';
-  document.getElementById('snap-img').style.height=document.getElementById('webcam-js').height+'px';
+  // document.getElementById('snap-img').style.width=document.getElementById('webcam-js').width+'px';
+  // document.getElementById('snap-img').style.height=document.getElementById('webcam-js').height+'px';
   document.getElementById('webcam-js').style.display='none';
   document.getElementById('snap-start').style.display='none';
   document.getElementById('snap-retry').style.display='block';
