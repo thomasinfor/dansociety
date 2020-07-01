@@ -28,8 +28,9 @@ body{width: 100%;margin: 0;padding: 0;}
 #capture{transform: scale(-1, 1);width: 100%;}
 #capture-block{position: absolute;top: 50%;width: 45%;left: 75%;transform: translate(-50%,-50%);}
 #model{position: absolute;top: 50%;width: 45%;left: 25%;transform: translate(-50%,-50%);}
-#video-input{position: absolute;top: 45%;width: 65%;left: 60%;transform: translate(-50%,-50%);max-height: 70%;max-width: 60%;}
-#speed-control{position: absolute;bottom: 5%;left: 50%;transform: translate(-50%,-50%);}
+#video-input{position: absolute;top: 50%;height: 70%;left: 60%;transform: translate(-50%,-50%);max-height: 70%;max-width: 60%;}
+#speed-control{position: absolute;bottom: 5%;left: 60%;transform: translate(-50%,-50%);width: 400px;}
+#speed-slide{display: inline-block;float: left;width: 150px;}
 #record > .button{position: absolute;bottom: 5%;left: 10%;}
 #estimate > .button{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);}
 /*@media only screen and (max-width: 800px){
@@ -72,7 +73,7 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
       </video>
       <div id="speed-control">
         <input id="speed-slide" type="range" min="10" max="100" value="100">
-        <div>playback speed: <div id="speed">1.00</div>x</div>
+        <div>playback speed: <span id="speed">1.00</span>x</div>
       </div>
     </div>
     <div class="page" id="record">
