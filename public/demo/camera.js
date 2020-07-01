@@ -1,7 +1,7 @@
 var x;
 function init_camera(){
   let constraintObj = { 
-    audio: true, 
+    audio: false, 
     video: { 
       facingMode: "user", 
       width: { min: 640, ideal: 1280, max: 1920 },
