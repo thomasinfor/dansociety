@@ -15,7 +15,7 @@ body,html{height: 100%; color: black!important;scroll-behavior: smooth;}
 body{width: 100%;margin: 0;padding: 0;}
 /*#package{overflow-x: scroll;}*/
 .page{width: 100%;height: 100vh;margin-bottom: 10vh;}
-#discription{}
+#description{}
 #video{position: relative;}
 #take-picture{position: relative;}
 #record{position: relative;}
@@ -42,15 +42,18 @@ body{width: 100%;margin: 0;padding: 0;}
 #webcam-js,#snap-img{position: absolute;top: 50%;left: 60%;transform: translate(-50%,-50%) scale(-1, 1);max-height: 60%;max-width: 60%;}
 #estimate{margin-bottom: 0!important;}
 img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
+#title{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);max-width: 500px;width: 90%;}
+#title > h1{font-size: 50px;}
+.step > .description{font-size: 20px;margin-left: 20px;}
 </style>
 </head>
 <body><center>
   <div id="package">
     <div class="page" id="description">
-      <div class="step"></div>
+      <div id="title"><h1>舞蹈學習系統 demo</h1><p>為了讓你更加了解我們的功能及執行方式，我們釋出這項demo版本。更多功能將在實際軟體中呈現。</p><p style="margin-top: 50px;">在接下來的十來分鐘，你將學到一個舞步：</p></div>
     </div>
     <div class="page" id="take-picture">
-      <div class="step">STEP 1</div>
+      <div class="step">STEP 1<span class="description">首先，你得拍一張全身入鏡的自拍照，如同範例。</span></div>
       <video autoplay playsinline id="webcam-js" class="flip"></video>
       <canvas id="canvas" class="d-none"></canvas>
       <img id="snap-img"></img>
@@ -62,18 +65,18 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
       <script src="webcam.js"></script>
     </div>
     <div class="page" id="video">
-      <div class="step">STEP 2</div>
+      <div class="step">STEP 2<span class="description">再來，活用慢動作播放功能，仔細觀察範例舞步，試著模仿相同的動作。</span></div>
       <video id="video-input" src="./demo-video.mp4" controls>
         <!-- <source src="./dance.mp4" type="video/mp4"> -->
         Your browser does not support the video tag.
       </video>
       <div id="speed-control">
         <input id="speed-slide" type="range" min="10" max="100" value="100">
-        <div>playback speed: <span id="speed">1.00</span>x</div>
+        <div>playback speed: <div id="speed">1.00</div>x</div>
       </div>
     </div>
     <div class="page" id="record">
-      <div class="step">STEP 3</div>
+      <div class="step">STEP 3<span class="description">準備好了嗎？準備好就開始錄你的動作吧！盡量讓你的全身都入鏡。</span></div>
       <video id="model" src="./demo-video.mp4" style="display: block;"></video>
       <video id="camera" style="display: block;" class="flip"></video>
       <div id="capture-block" style="display: none;">
@@ -85,7 +88,7 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
       <script src="./camera.js"></script>
     </div>
     <div class="page" id="estimate">
-      <div class="step">STEP 4</div>
+      <div class="step">STEP 4<span class="description">點選評分鍵評分，並邀請你的好友來一同競賽！</span></div>
       <div class="button" onclick="estimate();">evaluate</div>
       <div id="score"></div>
     </div>
