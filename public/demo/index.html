@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>DEMO</title>
+  <title>DEMO | DanSociety</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="../../images/favicon.png">
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -14,12 +15,7 @@
 body,html{height: 100%; color: black!important;scroll-behavior: smooth;}
 body{width: 100%;margin: 0;padding: 0;}
 /*#package{overflow-x: scroll;}*/
-.page{width: 100%;height: 100vh;margin-bottom: 10vh;}
-#description{}
-#video{position: relative;}
-#take-picture{position: relative;}
-#record{position: relative;}
-#estimate{position: relative;}
+.page{width: 100%;height: 100vh;margin-bottom: 10vh;position: relative;}
 #capture{display: none;}
 .button{/*position: absolute;bottom: 8%;left: 50%;transform: translate(-50%,-50%);*/background-color: #ccc;padding: 15px 30px;border-radius: 10px;cursor: pointer;}
 .button:hover{background-color: #aaa;}
@@ -31,12 +27,13 @@ body{width: 100%;margin: 0;padding: 0;}
 #video-input{position: absolute;top: 50%;height: 70%;left: 60%;transform: translate(-50%,-50%);max-height: 70%;max-width: 60%;}
 #speed-control{position: absolute;bottom: 5%;left: 60%;transform: translate(-50%,-50%);width: 400px;}
 #speed-slide{display: inline-block;float: left;width: 150px;}
-#record > .button{position: absolute;bottom: 5%;left: 10%;}
 #estimate > .button{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);}
 /*@media only screen and (max-width: 800px){
   center{display :none;}
   #notice{display: block!important}
 }*/
+#record > .button-block{position: absolute;bottom: 5%;left: 10%;}
+#record > .button-block > .button{margin-right: 20px;float: left;}
 #take-picture > .button-block{position: absolute;bottom: 5%;left: 10%;}
 .button-block > .button{margin-top: 20px;}
 .d-none{display: none;}
@@ -46,6 +43,7 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
 #title{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);max-width: 500px;width: 90%;}
 #title > h1{font-size: 50px;}
 .step > .description{font-size: 20px;margin-left: 20px;}
+#pict-input{display: none;}
 </style>
 </head>
 <body><center>
@@ -57,7 +55,8 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
       <div class="step">STEP 1<span class="description">首先，你得拍一張全身入鏡的自拍照，如同範例。</span></div>
       <video autoplay playsinline id="webcam-js" class="flip"></video>
       <canvas id="canvas" class="d-none"></canvas>
-      <img id="snap-img"></img>
+      <img id="snap-img" src="./demo-pict.png"></img>
+      <img id="pict-input" src="./demo-pict.png"></img>
       <div class="button-block">
         <div class="button" id="snap-start" style="display: block;">TAKE A SNAPSHOT</div>
         <div class="button" id="snap-retry" style="display: none;">RETRY</div>
@@ -83,36 +82,83 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
       <div id="capture-block" style="display: none;">
         <video id="capture" class="flip" style="display: block;"></video>
       </div>
-      <div class="button" id="btnStart" style="display: block">START</div>
-      <div class="button" id="btnStop" style="display: none;">STOP</div>
-      <div class="button" id="btnAgain" style="display: none;">RETRY</div>
+      <div class="button-block">
+        <div class="button" id="btnStart" style="display: block">START</div>
+        <div class="button" id="btnStop" style="display: none;">STOP</div>
+        <div class="button" id="btnAgain" style="display: none;">RETRY</div>
+        <div class="button" id="btnDone" style="display: none;">DONE</div>
+      </div>
       <script src="./camera.js"></script>
     </div>
     <div class="page" id="estimate">
       <div class="step">STEP 4<span class="description">點選評分鍵評分，並邀請你的好友來一同競賽！</span></div>
-      <div class="button" onclick="estimate();">evaluate</div>
+      <div class="button" id="estimate-button">evaluate</div>
       <div id="score"></div>
     </div>
   </div>
+  <script src="./ml.js"></script>
   <script>
+    var p1,v1,p2,v2,result,wait=4;
     function estimate(){
-      const net = posenet.load({
-        architecture: 'ResNet50',
-        outputStride: 32,
-        inputResolution: { width: 257, height: 200 },
+      console.log('estimate');
+      posenet.load({
+        architecture: 'MobileNetV1',
+        outputStride: 16,
+        inputResolution: { width: document.getElementById('pict-input').width, height: document.getElementById('pict-input').height },
         quantBytes: 2
       }).then((net)=>{
-        const pose1 = net.estimateSinglePose(document.getElementById('video-input'),{
-          flipHorizontal: true
-        });
-        const pose2 = net.estimateSinglePose(document.getElementById('capture'),{
-          flipHorizontal: true
-        });
-        return compare(pose1,pose2);
-      }).then((pose)=>{
-        document.getElementById('score').innerHTML=pose;
-      })
+        console.log('loaded.');
+        p1 = net.estimateSinglePose(document.getElementById('pict-input'),{ flipHorizontal: false });
+        if(--wait==0){
+          var t=evaluate_loss(p1,p2,v1,v2);
+          console.log(t);
+          document.getElementById('score').innerHTML=t;
+        }
+      });
+      posenet.load({
+        architecture: 'MobileNetV1',
+        outputStride: 16,
+        inputResolution: { width: document.getElementById('video-input').videoWidth, height: document.getElementById('video-input').videoHeight },
+        quantBytes: 2
+      }).then((net)=>{
+        console.log('loaded.');
+        v1 = net.estimateSinglePose(document.getElementById('video-input'),{ flipHorizontal: false });
+        if(--wait==0){
+          var t=evaluate_loss(p1,p2,v1,v2);
+          console.log(t);
+          document.getElementById('score').innerHTML=t;
+        }
+      });
+      posenet.load({
+        architecture: 'MobileNetV1',
+        outputStride: 16,
+        inputResolution: { width: document.getElementById('snap-img').width, height: document.getElementById('snap-img').height },
+        quantBytes: 2
+      }).then((net)=>{
+        console.log('loaded.');
+        p2 = net.estimateSinglePose(document.getElementById('snap-img'),{ flipHorizontal: true });
+        if(--wait==0){
+          var t=evaluate_loss(p1,p2,v1,v2);
+          console.log(t);
+          document.getElementById('score').innerHTML=t;
+        }
+      });
+      posenet.load({
+        architecture: 'MobileNetV1',
+        outputStride: 16,
+        inputResolution: { width: document.getElementById('capture').videoWidth, height: document.getElementById('capture').videoHeight },
+        quantBytes: 2
+      }).then((net)=>{
+        console.log('loaded.');
+        v2 = net.estimateSinglePose(document.getElementById('capture'),{ flipHorizontal: true });
+        if(--wait==0){
+          var t=evaluate_loss(p1,p2,v1,v2);
+          console.log(t);
+          document.getElementById('score').innerHTML=t;
+        }
+      });
     }
+    document.getElementById('estimate-button').onclick=estimate;
     const speed=document.getElementById('speed');
     const videoinput=document.getElementById('video-input');
     document.getElementById('speed-slide').oninput=function(){

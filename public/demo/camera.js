@@ -95,6 +95,10 @@ function init_camera(){
       document.getElementById('camera').style.display='block';
       document.getElementById('capture-block').style.display='none';
       document.getElementById('btnAgain').style.display='none';
+      document.getElementById('btnDone').style.display='none';
+    });
+    document.getElementById('btnDone').addEventListener('click',(ev)=>{
+      document.getElementById('estimate').scrollIntoView();
     });
     mediaRecorder.ondataavailable = function(ev) {
       chunks.push(ev.data);
@@ -108,6 +112,7 @@ function init_camera(){
       video.style.display='none';
       document.getElementById('btnStop').style.display='none';
       document.getElementById('btnAgain').style.display='block';
+      document.getElementById('btnDone').style.display='block';
     }
     model.onplay=()=>{vidSave.play().catch((e)=>{console.log(e);});};
     model.onpause=()=>{vidSave.pause();};
