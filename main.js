@@ -1,8 +1,10 @@
 const express=require('express');
 const bodyParser=require('body-parser');
-const mongo=require('mongodb').MongoClient;
+// const mongo=require('mongodb').MongoClient;
 const formidable=require('formidable');
 const fs=require('fs');
+const util=require('util');
+const mv=util.promisify(require('mv'));
 const path=require('path');
 const ffmpeg=require('ffmpeg');
 // const { exec }=require("child_process");
@@ -19,15 +21,15 @@ const dburl="mongodb://localhost:27017/";
 const port=2003;
 const app=new express();
 
-mongo.connect(dburl,function(err,db){
-  if(err) throw err;
-  var dbo=db.db('dansociety');
-  dbo.createCollection("subscribe-email",function(err,res){
-    if(err) throw err;
-    console.log("Collection 'subscribe-email' created !");
-    db.close();
-  });
-});
+// mongo.connect(dburl,function(err,db){
+//   if(err) throw err;
+//   var dbo=db.db('dansociety');
+//   dbo.createCollection("subscribe-email",function(err,res){
+//     if(err) throw err;
+//     console.log("Collection 'subscribe-email' created !");
+//     db.close();
+//   });
+// });
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:true}));
 
@@ -37,16 +39,16 @@ app.get('/',function(req,res){
 
 app.post('/subscribe',(req,res)=>{
   console.log(req.body);
-  mongo.connect(dburl,function(err,db){
-    if(err) throw err;
-    var dbo=db.db('dansociety');
-    dbo.collection("subscribe-email").insertOne({
-      email:req.body.email,time:new Date()
-    },function(err,res){
-      if(err) throw err;
-      db.close();
-    });
-  });
+  // mongo.connect(dburl,function(err,db){
+  //   if(err) throw err;
+  //   var dbo=db.db('dansociety');
+  //   dbo.collection("subscribe-email").insertOne({
+  //     email:req.body.email,time:new Date()
+  //   },function(err,res){
+  //     if(err) throw err;
+  //     db.close();
+  //   });
+  // });
   res.end();
 });
 
@@ -57,13 +59,13 @@ function moveVideo(oldpath,newpath){
     return video
     .setVideoFrameRate(30)
     .setVideoFormat('mp4')
-    .save(newpath,);
+    .save(newpath);
   });
   return process;
 }
 function moveImg(oldpath,newpath){
   console.log(newpath);
-  return fs.promises.rename(oldpath,newpath);
+  return mv(oldpath,newpath,{mkdirp: true});
 }
 function evaluate(img1,video1,img2,video2){
   return new Promise((resolve,reject)=>{
