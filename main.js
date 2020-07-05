@@ -78,20 +78,22 @@ app.post('/demo/evaluate',(req,res)=>{
     if(err){next(err);return;}
     // console.log(fields);
     // console.log(files);
-    var img=moveImg(
-      files.userImg.path,
-      path.join(path.join(__dirname,'./data/'),files.userImg.name)
-    );
-    var video=moveVideo(
-      files.userVideo.path,
-      path.join(path.join(__dirname,'./data/'),files.userVideo.name+'.mp4')
-    );
-    Promise.all([img,video]).then(values=>{
-      return evaluate(1,2,3,4);
-    }).then(pts=>{
-      res.end(pts);
-    }).catch(e=>{
-      console.log(e);
-    });
+    try{
+      var img=moveImg(
+        files.userImg.path,
+        path.join(path.join(__dirname,'./data/'),files.userImg.name)
+      );
+      var video=moveVideo(
+        files.userVideo.path,
+        path.join(path.join(__dirname,'./data/'),files.userVideo.name+'.mp4')
+      );
+      Promise.all([img,video]).then(values=>{
+        return evaluate(1,2,3,4);
+      }).then(pts=>{
+        res.end(pts);
+      }).catch(e=>{
+        console.log(e);
+      });
+    }catch(e){console.log(e);}
   });
 });

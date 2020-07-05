@@ -27,7 +27,7 @@ body{width: 100%;margin: 0;padding: 0;}
 #capture{transform: scale(-1, 1);width: 100%;}
 #capture-block{position: absolute;top: 50%;width: 45%;left: 75%;transform: translate(-50%,-50%);}
 #model{position: absolute;top: 50%;width: 45%;left: 25%;transform: translate(-50%,-50%);}
-#video-input{position: absolute;top: 50%;left: 60%;transform: translate(-50%,-50%);max-height: 70%;max-width: 60%;}
+#video-input{position: absolute;top: 50%;left: 60%;transform: translate(-50%,-50%);max-height: 60%;max-width: 60%;}
 #speed-control{position: absolute;bottom: 0;left: 60%;transform: translate(-50%,-50%);min-width: 220px;}
 #speed-slide{display: inline-block;width: 150px;}
 #estimate > .button{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);}
@@ -106,6 +106,7 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
   <script>
     function estimate(){
       // var formdata=new FormData();
+      if(formdata.get('userImg')=='none'||formdata.get('userVideo')=='none') return;
       formdata.set('test','so hard');
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
