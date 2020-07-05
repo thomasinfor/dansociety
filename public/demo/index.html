@@ -4,12 +4,15 @@
   <title>DEMO | DanSociety</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="../../images/favicon.png">
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href="https://vjs.zencdn.net/7.8.3/video-js.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+  <script>
+    var formdata=new FormData();formdata.set('userVideo','none');formdata.set('userImg','none');
+  </script>
 <style>
 *{font-family: 'Open Sans', 'Noto Sans TC';}
 body,html{height: 100%; color: black!important;scroll-behavior: smooth;}
@@ -24,9 +27,9 @@ body{width: 100%;margin: 0;padding: 0;}
 #capture{transform: scale(-1, 1);width: 100%;}
 #capture-block{position: absolute;top: 50%;width: 45%;left: 75%;transform: translate(-50%,-50%);}
 #model{position: absolute;top: 50%;width: 45%;left: 25%;transform: translate(-50%,-50%);}
-#video-input{position: absolute;top: 50%;height: 70%;left: 60%;transform: translate(-50%,-50%);max-height: 70%;max-width: 60%;}
-#speed-control{position: absolute;bottom: 5%;left: 60%;transform: translate(-50%,-50%);width: 400px;}
-#speed-slide{display: inline-block;float: left;width: 150px;}
+#video-input{position: absolute;top: 50%;left: 60%;transform: translate(-50%,-50%);max-height: 70%;max-width: 60%;}
+#speed-control{position: absolute;bottom: 0;left: 60%;transform: translate(-50%,-50%);min-width: 220px;}
+#speed-slide{display: inline-block;width: 150px;}
 #estimate > .button{position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);}
 /*@media only screen and (max-width: 800px){
   center{display :none;}
@@ -44,6 +47,7 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
 #title > h1{font-size: 50px;}
 .step > .description{font-size: 20px;margin-left: 20px;}
 #pict-input{display: none;}
+#score{position: absolute;top: 70%;left: 50%;transform: translate(-50%,-50%);}
 </style>
 </head>
 <body><center>
@@ -77,7 +81,9 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
     </div>
     <div class="page" id="record">
       <div class="step">STEP 3<span class="description">準備好了嗎？準備好就開始錄你的動作吧！盡量讓你的全身都入鏡。</span></div>
-      <video id="model" src="./demo-video.mp4" style="display: block;"></video>
+      <video id="model" src="./demo-video.mp4" style="display: block;">
+        please refresh if video available.
+      </video>
       <video id="camera" style="display: block;" class="flip"></video>
       <div id="capture-block" style="display: none;">
         <video id="capture" class="flip" style="display: block;"></video>
@@ -98,65 +104,17 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
   </div>
   <script src="./ml.js"></script>
   <script>
-    var p1,v1,p2,v2,result,wait=4;
     function estimate(){
-      console.log('estimate');
-      posenet.load({
-        architecture: 'MobileNetV1',
-        outputStride: 16,
-        inputResolution: { width: document.getElementById('pict-input').width, height: document.getElementById('pict-input').height },
-        quantBytes: 2
-      }).then((net)=>{
-        console.log('loaded.');
-        p1 = net.estimateSinglePose(document.getElementById('pict-input'),{ flipHorizontal: false });
-        if(--wait==0){
-          var t=evaluate_loss(p1,p2,v1,v2);
-          console.log(t);
-          document.getElementById('score').innerHTML=t;
+      // var formdata=new FormData();
+      formdata.set('test','so hard');
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+         document.getElementById("score").innerHTML = this.responseText;
         }
-      });
-      posenet.load({
-        architecture: 'MobileNetV1',
-        outputStride: 16,
-        inputResolution: { width: document.getElementById('video-input').videoWidth, height: document.getElementById('video-input').videoHeight },
-        quantBytes: 2
-      }).then((net)=>{
-        console.log('loaded.');
-        v1 = net.estimateSinglePose(document.getElementById('video-input'),{ flipHorizontal: false });
-        if(--wait==0){
-          var t=evaluate_loss(p1,p2,v1,v2);
-          console.log(t);
-          document.getElementById('score').innerHTML=t;
-        }
-      });
-      posenet.load({
-        architecture: 'MobileNetV1',
-        outputStride: 16,
-        inputResolution: { width: document.getElementById('snap-img').width, height: document.getElementById('snap-img').height },
-        quantBytes: 2
-      }).then((net)=>{
-        console.log('loaded.');
-        p2 = net.estimateSinglePose(document.getElementById('snap-img'),{ flipHorizontal: true });
-        if(--wait==0){
-          var t=evaluate_loss(p1,p2,v1,v2);
-          console.log(t);
-          document.getElementById('score').innerHTML=t;
-        }
-      });
-      posenet.load({
-        architecture: 'MobileNetV1',
-        outputStride: 16,
-        inputResolution: { width: document.getElementById('capture').videoWidth, height: document.getElementById('capture').videoHeight },
-        quantBytes: 2
-      }).then((net)=>{
-        console.log('loaded.');
-        v2 = net.estimateSinglePose(document.getElementById('capture'),{ flipHorizontal: true });
-        if(--wait==0){
-          var t=evaluate_loss(p1,p2,v1,v2);
-          console.log(t);
-          document.getElementById('score').innerHTML=t;
-        }
-      });
+      };
+      xhttp.open('POST','./evaluate',true);
+      xhttp.send(formdata);
     }
     document.getElementById('estimate-button').onclick=estimate;
     const speed=document.getElementById('speed');

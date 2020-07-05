@@ -1,6 +1,19 @@
 const express=require('express');
 const bodyParser=require('body-parser');
 const mongo=require('mongodb').MongoClient;
+const formidable=require('formidable');
+const fs=require('fs');
+const path=require('path');
+const ffmpeg=require('ffmpeg');
+// const { exec }=require("child_process");
+// const posenet=require('@tensorflow-models/posenet');
+
+// const net=posenet.load({
+//   architecture: 'MobileNetV1',
+//   outputStride: 16,
+//   inputResolution: { width: 640, height: 640 },
+//   multiplier: 0.75
+// });
 
 const dburl="mongodb://localhost:27017/";
 const port=2003;
@@ -35,4 +48,50 @@ app.post('/subscribe',(req,res)=>{
     });
   });
   res.end();
+});
+
+function moveVideo(oldpath,newpath){
+  console.log(newpath);
+  var process = new ffmpeg(oldpath);
+  process.then(video=>{
+    return video
+    .setVideoFrameRate(30)
+    .setVideoFormat('mp4')
+    .save(newpath,);
+  });
+  return process;
+}
+function moveImg(oldpath,newpath){
+  console.log(newpath);
+  return fs.promises.rename(oldpath,newpath);
+}
+function evaluate(img1,video1,img2,video2){
+  return new Promise((resolve,reject)=>{
+    resolve('100pts');
+  });
+}
+
+app.post('/demo/evaluate',(req,res)=>{
+  console.log('evaluate');
+  const form = formidable({ multiples: true });
+  form.parse(req, (err, fields, files) => {
+    if(err){next(err);return;}
+    // console.log(fields);
+    // console.log(files);
+    var img=moveImg(
+      files.userImg.path,
+      path.join(path.join(__dirname,'./data/'),files.userImg.name)
+    );
+    var video=moveVideo(
+      files.userVideo.path,
+      path.join(path.join(__dirname,'./data/'),files.userVideo.name+'.mp4')
+    );
+    Promise.all([img,video]).then(values=>{
+      return evaluate(1,2,3,4);
+    }).then(pts=>{
+      res.end(pts);
+    }).catch(e=>{
+      console.log(e);
+    });
+  });
 });
