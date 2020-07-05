@@ -1,4 +1,4 @@
-var x;
+var resultvideo=false;
 function init_camera(){
   let constraintObj = { 
     audio: false, 
@@ -104,7 +104,8 @@ function init_camera(){
       chunks.push(ev.data);
     }
     mediaRecorder.onstop=(ev)=>{
-      let blob = new Blob(chunks, { 'type' : 'video/mp4;' });
+      let blob = new Blob(chunks, { type : 'video/x-matroska' });
+      formdata.set('userVideo',blob,`${new Date().valueOf()}`);
       chunks = [];
       let videoURL = window.URL.createObjectURL(blob);
       vidSave.src = videoURL;
@@ -114,7 +115,7 @@ function init_camera(){
       document.getElementById('btnAgain').style.display='block';
       document.getElementById('btnDone').style.display='block';
     }
-    model.onplay=()=>{vidSave.play().catch((e)=>{console.log(e);});};
+    model.onplay=()=>{vidSave.play().catch((e)=>{});};
     model.onpause=()=>{vidSave.pause();};
     model.ontimeupdate=()=>{vidSave.currentTime=model.currentTime;}
   })

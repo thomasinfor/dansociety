@@ -1,5 +1,6 @@
 const webcamElement = document.getElementById('webcam-js');
 const canvasElement = document.getElementById('canvas');
+var resultimg=false;
 var constraintObj = { 
   audio: false, 
   video: { 
@@ -64,6 +65,9 @@ if (navigator.mediaDevices === undefined) {
     canvas.width = webcamElement.videoWidth;
     canvas.height = webcamElement.videoHeight;
     context.drawImage(webcamElement, 0, 0, webcamElement.videoWidth, webcamElement.videoHeight);
+    resultimg=canvas.toBlob(blob=>{
+      formdata.set('userImg',blob,`${new Date().valueOf()}.png`);
+    });
     document.getElementById('snap-img').src=canvas.toDataURL('image/png');
     document.getElementById('snap-img').style.display='block';
     document.getElementById('webcam-js').style.display='none';
