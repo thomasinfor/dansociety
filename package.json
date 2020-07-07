@@ -21,6 +21,7 @@
     "@tensorflow-models/posenet": "^2.2.1",
     "@tensorflow/tfjs-converter": "^2.0.1",
     "@tensorflow/tfjs-core": "^2.0.1",
+    "child-process-promise": "^2.2.1",
     "express": "^4.17.1",
     "ffmpeg": "0.0.4",
     "formidable": "^1.2.2",

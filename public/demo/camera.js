@@ -23,7 +23,7 @@ function init_camera(){
     navigator.mediaDevices.enumerateDevices()
     .then(devices => {
       devices.forEach(device=>{
-        console.log(device.kind.toUpperCase(), device.label);
+        // console.log(device.kind.toUpperCase(), device.label);
         //, device.deviceId
       })
     })
@@ -54,6 +54,7 @@ function init_camera(){
     var startfunction=(ev)=>{
       model.currentTime=0;
       model.controls=false;
+      document.getElementById('btnFull').style.display='block';
       document.getElementById('camera').style.display='block';
       document.getElementById('model').style.display='block';
       start.removeEventListener('click',startfunction);
@@ -66,10 +67,10 @@ function init_camera(){
           start.addEventListener('click',startfunction);
           mediaRecorder.start();
           document.getElementById('model').play().catch((e)=>{console.log(e);});
+          document.getElementById('btnFull').style.display='none';
           document.getElementById('btnStart').style.display='none';
           document.getElementById('btnStart').innerHTML='START';
           document.getElementById('btnStop').style.display='block';
-          console.log(mediaRecorder.state);
           clearInterval(id);
         }else{
           document.getElementById('btnStart').innerHTML=`START IN ${cnt-1}s`;
@@ -84,7 +85,7 @@ function init_camera(){
       model.onended=()=>{};
       model.currentTime=0;
       model.controls=true;
-      console.log(mediaRecorder.state);
+      // console.log(mediaRecorder.state);
     }
     stop.addEventListener('click', stopfunction);
     document.getElementById('btnAgain').addEventListener('click', (ev)=>{
@@ -96,6 +97,9 @@ function init_camera(){
       document.getElementById('capture-block').style.display='none';
       document.getElementById('btnAgain').style.display='none';
       document.getElementById('btnDone').style.display='none';
+    });
+    document.getElementById('btnFull').addEventListener('click',(ev)=>{
+      model.requestFullscreen();
     });
     document.getElementById('btnDone').addEventListener('click',(ev)=>{
       document.getElementById('estimate').scrollIntoView();

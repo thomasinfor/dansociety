@@ -89,7 +89,8 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
         <video id="capture" class="flip" style="display: block;"></video>
       </div>
       <div class="button-block">
-        <div class="button" id="btnStart" style="display: block">START</div>
+        <div class="button" id="btnStart" style="display: block;">START</div>
+        <div class="button" id="btnFull" style="display: none;">FULLSCREEN</div>
         <div class="button" id="btnStop" style="display: none;">STOP</div>
         <div class="button" id="btnAgain" style="display: none;">RETRY</div>
         <div class="button" id="btnDone" style="display: none;">DONE</div>
@@ -102,16 +103,15 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
       <div id="score"></div>
     </div>
   </div>
-  <script src="./ml.js"></script>
   <script>
     function estimate(){
       // var formdata=new FormData();
       if(formdata.get('userImg')=='none'||formdata.get('userVideo')=='none') return;
       formdata.set('test','so hard');
       var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-         document.getElementById("score").innerHTML = this.responseText;
+      xhttp.onreadystatechange=function() {
+        if(this.readyState==4&&this.status==200){
+          document.getElementById("score").innerHTML=this.responseText;
         }
       };
       xhttp.open('POST','./evaluate',true);

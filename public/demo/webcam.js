@@ -30,10 +30,8 @@ if (navigator.mediaDevices === undefined) {
     navigator.mediaDevices.getUserMedia(constraintObj)
     .then(function(mediaStreamObj) {
       if ("srcObject" in webcamElement) {
-        console.log('this');
         webcamElement.srcObject = mediaStreamObj;
       } else {
-        console.log('that');
         webcamElement.src = window.URL.createObjectURL(mediaStreamObj);
       }
       
@@ -41,7 +39,7 @@ if (navigator.mediaDevices === undefined) {
         webcamElement.play();
       };
     }).then(result=>{
-      console.log("webcam started");
+      // console.log("webcam started");
     }).catch(err => {
       console.log(err);
     });
