@@ -25,11 +25,11 @@ const dburl="mongodb://localhost:27017/";
 const port=2003;
 const app=new express();
 
-// const log=(new console.Console({
-//   stdout: fs.createWriteStream('./log/stdout.log'),
-//   stderr: fs.createWriteStream('./log/stderr.log')
-// })).log;
-const log=console.log;
+const log=(new console.Console({
+  stdout: fs.createWriteStream('./log/stdout.log',{flags:'a'}),
+  stderr: fs.createWriteStream('./log/stderr.log',{flags:'a'})
+})).log;
+// const log=console.log;
 
 // mongo.connect(dburl,function(err,db){
 //   if(err) throw err;

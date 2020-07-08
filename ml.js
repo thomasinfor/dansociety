@@ -170,32 +170,24 @@ exports.evaluate_loss = function(a1,v1,a2,v2){
     var b1x,b1y,b2x,b2y;
     [b1x,b1y] = convert_1darr(a1.frames[0]);
     [b2x,b2y] = convert_1darr(a2.frames[0]);
-    // console.log(b1x.length);
-    // console.log(b1y.length);
-    // console.log(b2x.length);
-    // console.log(b2y.length);
 
     var prop = pro(b1x,b1y,b2x,b2y);
-    // console.log(prop);
 
-    //input video as v1,v2
+    // trim frames[] to same size
+    if(v1.frames.length>v2.frames.length)
+        v1.frames.slice(0,v2.frames.length);
+    if(v1.frames.length<v2.frames.length)
+        v2.frames.slice(0,v1.frames.length);
+
+    // input video as v1,v2
     var v1x,v1y,v2x,v2y;
     [v1x,v1y] = convert_2darr(v1.frames);
     [v2x,v2y] = convert_2darr(v2.frames);
-    // console.log(v1x.length);
-    // console.log(v1y.length);
-    // console.log(v2x.length);
-    // console.log(v2y.length);
 
     [v2x_new,v2y_new] = movepoint(prop,v2x,v2y);
-    // console.log(v2x_new[0]);
-    // console.log(v2y_new[0]);
-    // console.log(v2x_new.length);
-    // console.log(v2y_new.length);
 
     var res_loss = loss(v1x,v1y,v2x_new,v2y_new);
-    // console.log(res_loss.length);
-    // console.log(res_loss[0]);
+
     var tot=0;
     for(var i=0;i<res_loss.length;i++){
         for(var j=0;j<res_loss[0].length;j++){
