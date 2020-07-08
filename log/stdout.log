@@ -1,0 +1,9 @@
+Server running at localhost:2003
+token updated !
+eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOjE1NjMsImxpY2Vuc2VfaWQiOjEyNTMsImFkZG9ucyI6e30sImV4cCI6MTU5NDIyMDMwOSwiaWRlbnRpdHkiOjE1NjMsImlhdCI6MTU5NDIxMzEwOSwianRpIjoiNjg2ZGQ2MDJhN2IwMWIzNDQwZDcwOGYzNGYwNTYxYzAwZmZiMmM3MzcwMDU2Zjk1YmZmODc0NDQ2YTIyZjNmNCIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ImZhZiIsInJvb3RfYWNjZXNzIjpmYWxzZX0.XxHPNVZmsO_njyxJp-o-eIhhHUORS0N-kWCX41DyihA
+./public/demo/demo-pict.png ./public/demo/demo-video.mp4 ./data/1594181061895.png ./data/1594181085057.mp4
+read ./pose/demo-pict.json
+read ./pose/1594181061895.json
+read ./pose/demo-video.json
+read ./pose/1594181085057.json
+NaN
