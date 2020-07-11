@@ -105,13 +105,19 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
   </div>
   <script>
     function estimate(){
-      // var formdata=new FormData();
-      if(formdata.get('userImg')=='none'||formdata.get('userVideo')=='none') return;
+      var err=[];
+      if(formdata.get('userImg')=='none') err.push('image');
+      if(formdata.get('userVideo')=='none') err.push('video');
+      if(err.length!=0){
+        window.alert(`Missing ${err.join(' and ')} !\nPlease finish the recording.`);
+        return;
+      }
       formdata.set('test','so hard');
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange=function() {
         if(this.readyState==4&&this.status==200){
           document.getElementById("score").innerHTML=this.responseText;
+          console.log(this.responseText);
         }
       };
       xhttp.open('POST','./evaluate',true);

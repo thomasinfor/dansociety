@@ -10,14 +10,6 @@ const mv=util.promisify(require('mv'));
 const path=require('path');
 const ffmpeg=require('ffmpeg');
 const execute=require('child-process-promise').exec;
-// const posenet=require('@tensorflow-models/posenet');
-
-// const net=posenet.load({
-//   architecture: 'MobileNetV1',
-//   outputStride: 16,
-//   inputResolution: { width: 640, height: 640 },
-//   multiplier: 0.75
-// });
 
 const apikey='e0cae3a6-2cc8-4b2f-a3a2-2882205deac3';
 var token=null;
@@ -66,13 +58,15 @@ function status(x){x=String(x);return x.slice(x.length-3);}
 function moveVideo(oldpath,newpath){
   log(newpath);
   var video = new ffmpeg(oldpath);
-  video.then(video=>{
-    return video
-    .setVideoFrameRate(30)
-    .setVideoFormat('mp4')
-    .save(newpath);
+  var ret=new Promise((resolve,reject)=>{
+    video.then(video=>{
+      return video
+      .setVideoFrameRate(30)
+      .setVideoFormat('mp4')
+      .save(newpath,(err,file)=>{resolve(file);});
+    });
   });
-  return video;
+  return ret;
 }
 function moveImg(oldpath,newpath){
   log(newpath);
@@ -91,16 +85,17 @@ async function updateToken(){
       log(token);
     }else updateToken();
   }).catch(err=>{
-    console.error('request token\nERROR: ',err);
+    log('request token\nERROR: ',err);
     token=null;
   });
 }
-updateToken();
 function submitWrnch(path,main='centre',width=456,height=256){
+  if(!token) updateToken();
   var cmd=`curl https://api.wrnch.ai/v1/jobs `+
           `-H "Authorization: Bearer ${token}" `+
           `-F "work_type=json" `+
           `-F "media=@${path}" `+
+          `-F "main_person=${main}" `+
           `-X POST `+
           `-w "%{http_code}"`;
   return execute(cmd).then(res=>{
@@ -118,6 +113,7 @@ function submitWrnch(path,main='centre',width=456,height=256){
     if(!id) return id;
     return new Promise((resolve,reject)=>{
       var timer=setInterval(()=>{
+        if(!token) updateToken();
         var cmd=`curl https://api.wrnch.ai/v1/status/${id} `+
                 `-H "Authorization: Bearer ${token}" `+
                 `-w "%{http_code}"`;
@@ -128,16 +124,17 @@ function submitWrnch(path,main='centre',width=456,height=256){
             clearInterval(timer);
           }
         }).catch(err=>{
-          console.error(`get job ${id} status\nERROR: `,err);
+          log(`get job ${id} status\nERROR: `,err);
         });
       },5000);
     });
   }).catch(err=>{
-    console.error('submitWrnch\nERROR: ',err);
+    log('submitWrnch\nERROR: ',err);
   });
 }
 function getResultWrnch(id){
   if(!id) return id;
+  if(!token) updateToken();
   var cmd=`curl https://api.wrnch.ai/v1/jobs/${id} `+
           `-H "Authorization: Bearer ${token}" `+
           `-w "%{http_code}"`;
@@ -151,13 +148,12 @@ function getResultWrnch(id){
       return null;
     }
   }).catch(err=>{
-    console.error(`get job ${id} result\nERROR: `,err);
+    log(`get job ${id} result\nERROR: `,err);
   });
 }
 function pose(p){
   var jsonp=`./pose/${path.parse(p).name}.json`;
   if(!fs.existsSync(jsonp)){
-    // log('new ',p);
     return submitWrnch(p).then(getResultWrnch).then(res=>{
       if(res){
         fs.writeFile(jsonp,JSON.stringify(res,null,2),err=>{
@@ -168,7 +164,6 @@ function pose(p){
       }else return null;
     });
   }else{
-    // log('old ',p);
     return new Promise((resolve,reject)=>{
       fs.readFile(jsonp,(err,data)=>{
         if(err) throw err;
@@ -187,20 +182,11 @@ function evaluate(p1,v1,p2,v2){
     log(`evaluate\n${p1}\n${v1}\n${p2}\n${v2}\nERROR: ${err}`);
   });
 }
-setTimeout(()=>{evaluate(
-  './public/demo/demo-pict.png',
-  './public/demo/demo-video.mp4',
-  './data/1594181061895.png',
-  './data/1594181085057.mp4').then(pts=>{
-    log(pts);
-  })},5000);
 app.post('/demo/evaluate',(req,res)=>{
   log('post evaluate');
   const form = formidable({ multiples: true });
   form.parse(req, (err, fields, files) => {
     if(err){next(err);return;}
-    // log(fields);
-    // log(files);
     try{
       var pimg=path.join(path.join(__dirname,'./data/'),files.userImg.name);
       var pvideo=path.join(path.join(__dirname,'./data/'),files.userVideo.name+'.mp4');
@@ -214,7 +200,7 @@ app.post('/demo/evaluate',(req,res)=>{
         );
       }).then(pts=>{
         log(pts);
-        res.end(String(pts));
+        res.end(JSON.stringify(pts));
         log('post evaluate end');
       }).catch(e=>{
         log(e);
@@ -222,3 +208,11 @@ app.post('/demo/evaluate',(req,res)=>{
     }catch(e){log(e);}
   });
 });
+log((new Date()).toLocaleString());
+updateToken();
+// setTimeout(()=>{evaluate(
+//   './public/demo/demo-pict.png',
+//   './public/demo/demo-video.mp4',
+//   './data/1594461887480.png',
+//   './data/1594462292424.mp4'
+// ).then(pts=>{log(pts);});},2000);

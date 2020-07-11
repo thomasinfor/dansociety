@@ -1,199 +1,160 @@
-function l(p1x,p1y,p2x,p2y){
-    var len = Math.sqrt((p1x-p2x)**2+(p1y-p2y)**2);
-    return len;
+const joints=17;
+function largest_person(x){
+    if(x.length==0) return null;
+    var max=0;
+    for(var i=1;i<x.length;i++)
+        if(x[i].pose2d.is_main&&x[max].pose2d.bbox.height*x[max].pose2d.bbox.width<x[i].pose2d.bbox.height*x[i].pose2d.bbox.width)
+            max=i;
+    return x[max];
 }
- 
+
+function l(p1x,p1y,p2x,p2y){return Math.sqrt((p1x-p2x)**2+(p1y-p2y)**2);}
+
+const exclude=[8,9,17,18,19,20,23,24];
+const empty=[NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN];
 function convert_1darr(a){
-    var arrx = new Array();
-    var arry = new Array();
+    var arrx = [], arry = [], origin = largest_person(a.persons);
+    if(!origin) return [empty,empty];
     for(var i=0;i<a.persons[0].pose2d.joints.length/2;i++){
-        if(i==17||i==18||i==19||i==20||i==23||i==24) continue;
-        arrx.push(a.persons[0].pose2d.joints[i*2]);
-        arry.push(a.persons[0].pose2d.joints[i*2+1]);
+        if(exclude.includes(i)) continue;
+        if(origin.pose2d.joints[i*2]<0||origin.pose2d.joints[i*2+1]<0){
+            arrx.push(NaN); arry.push(NaN);
+        }else{
+            arrx.push(a.width*origin.pose2d.joints[i*2]); arry.push(a.height*origin.pose2d.joints[i*2+1]);
+        }
     }
     return [arrx,arry];
 }
- 
+
 function convert_2darr(a){
-    var arrayx = new Array(a.length);
-    var arrayy = new Array(a.length);
-    for(var i=0;i<a.length;i++){
+    var arrayx = new Array(a.length), arrayy = new Array(a.length);
+    for(var i=0;i<a.length;i++)
         [arrayx[i],arrayy[i]]=convert_1darr(a[i]);
-        // arrayx[i]=new Array();
-        // arrayy[i]=new Array();
-        // for(var j=0;j<a[0].keypoints.length;j++){
-        //     if(j==17||j==18||j==19||j==20) continue;
-        //     arrayx[i].push(a[i].keypoints[j].position.x);
-        //     arrayy[i].push(a[i].keypoints[j].position.y);
-        // }
-    }
     return [arrayx,arrayy];
- 
 }
- 
+
+const graph=[
+    [7,14],[7,10],[7,11],[10,9],[9,8],[11,12],[12,13],[10,2],[11,3],[7,6],[2,1],[1,0],[0,15],[3,4],[4,5],[5,16]
+];
 function length(x,y){
-    var a1 = [l(x[8],y[8],x[16],y[16]),
-    l(x[8],y[8],x[12],y[12]),
-    l(x[8],y[8],x[13],y[13]),
-    l(x[11],y[11],x[12],y[12]),
-    l(x[10],y[10],x[11],y[11]),
-    l(x[13],y[13],x[14],y[14]),
-    l(x[14],y[14],x[15],y[15]),
-    l(x[2],y[2],x[12],y[12]),
-    l(x[3],y[3],x[13],y[13]),
-    l(x[8],y[8],x[6],y[6]),
-    l(x[1],y[1],x[2],y[2]),
-    l(x[0],y[0],x[1],y[1]),
-    l(x[0],y[0],x[17],y[17]),
-    l(x[3],y[3],x[4],y[4]),
-    l(x[4],y[4],x[5],y[5]),
-    l(x[5],y[5],x[18],y[18])];
-    return a1;
+    return graph.map(e=>l(x[e[0]],y[e[0]],x[e[1]],y[e[1]]));
 }
- 
+
+function check(arr){
+    for(var i=0;i<arr.length;i++) if(i!=9&&arr[i]==NaN) return false;
+    return true;
+}
+
 function pro(b1x,b1y,b2x,b2y){
-    var prop = new Array();
-    var l1=length(b1x,b1y);
-    var l2=length(b2x,b2y);
-    for (var i=0;i<l1.length;i++)
-        prop.push(l1[i]/l2[i]);
-    return prop;
+    if(check(b1x,b1y)&&check(b2x,b2y)){
+        var prop = [], l1=length(b1x,b1y), l2=length(b2x,b2y);
+        for (var i=0;i<l1.length;i++) prop.push(l1[i]/l2[i]);
+        return prop;
+    }else return null;
 }
- 
-function movepoint(prop,video2x,video2y){
-    var x_new = new Array(video2x.length);
-    var y_new = new Array(video2x.length);
+
+const identity=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+function movepoint(video2x,video2y,prop=null){
+    if(!prop) prop=identity;
+    var x_new = new Array(video2x.length), y_new = new Array(video2x.length);
     for (var i=0;i<video2x.length;i++){
-
-        x_new[i]=(new Array(19));
-        y_new[i]=(new Array(19));
-
-        x_new[i][8]=video2x[i][8];
-        x_new[i][7]=video2x[i][7];
-        x_new[i][16]=x_new[i][8]+prop[0]*(video2x[i][16]-video2x[i][8]);
-        x_new[i][12]=x_new[i][8]+prop[1]*(video2x[i][12]-video2x[i][8]);
-        x_new[i][13]=x_new[i][8]+prop[2]*(video2x[i][13]-video2x[i][8]);
-        x_new[i][11]=x_new[i][12]+prop[3]*(video2x[i][11]-video2x[i][12]);
-        x_new[i][10]=x_new[i][11]+prop[4]*(video2x[i][10]-video2x[i][11]);
-        x_new[i][14]=x_new[i][13]+prop[5]*(video2x[i][14]-video2x[i][13]);
-        x_new[i][15]=x_new[i][14]+prop[6]*(video2x[i][15]-video2x[i][14]);
-        x_new[i][2]=x_new[i][12]+prop[7]*(video2x[i][2]-video2x[i][12]);
-        x_new[i][3]=x_new[i][13]+prop[8]*(video2x[i][3]-video2x[i][13]);
-        x_new[i][6]=x_new[i][8]+prop[9]*(video2x[i][6]-video2x[i][8]);
-        x_new[i][1]=x_new[i][2]+prop[10]*(video2x[i][1]-video2x[i][2]);
-        x_new[i][0]=x_new[i][1]+prop[11]*(video2x[i][0]-video2x[i][1]);
-        x_new[i][17]=x_new[i][0]+prop[12]*(video2x[i][17]-video2x[i][0]);
-        x_new[i][4]=x_new[i][3]+prop[13]*(video2x[i][4]-video2x[i][3]);
-        x_new[i][5]=x_new[i][4]+prop[14]*(video2x[i][5]-video2x[i][4]);
-        x_new[i][18]=x_new[i][5]+prop[15]*(video2x[i][18]-video2x[i][5]);
-
-        y_new[i][8]=video2y[i][8];
-        y_new[i][7]=video2y[i][7];
-        y_new[i][16]=y_new[i][8]+prop[0]*(video2y[i][16]-video2y[i][8]);
-        y_new[i][12]=y_new[i][8]+prop[1]*(video2y[i][12]-video2y[i][8]);
-        y_new[i][13]=y_new[i][8]+prop[2]*(video2y[i][13]-video2y[i][8]);
-        y_new[i][11]=y_new[i][12]+prop[3]*(video2y[i][11]-video2y[i][12]);
-        y_new[i][10]=y_new[i][11]+prop[4]*(video2y[i][10]-video2y[i][11]);
-        y_new[i][14]=y_new[i][13]+prop[5]*(video2y[i][14]-video2y[i][13]);
-        y_new[i][15]=y_new[i][14]+prop[6]*(video2y[i][15]-video2y[i][14]);
-        y_new[i][2]=y_new[i][12]+prop[7]*(video2y[i][2]-video2y[i][12]);
-        y_new[i][3]=y_new[i][13]+prop[8]*(video2y[i][3]-video2y[i][13]);
-        y_new[i][6]=y_new[i][8]+prop[9]*(video2y[i][6]-video2y[i][8]);
-        y_new[i][1]=y_new[i][2]+prop[10]*(video2y[i][1]-video2y[i][2]);
-        y_new[i][0]=y_new[i][1]+prop[11]*(video2y[i][0]-video2y[i][1]);
-        y_new[i][17]=y_new[i][0]+prop[12]*(video2y[i][17]-video2y[i][0]);
-        y_new[i][4]=y_new[i][3]+prop[13]*(video2y[i][4]-video2y[i][3]);
-        y_new[i][5]=y_new[i][4]+prop[14]*(video2y[i][5]-video2y[i][4]);
-        y_new[i][18]=y_new[i][5]+prop[15]*(video2y[i][18]-video2y[i][5]);
+        x_new[i]=(new Array(19)); y_new[i]=(new Array(19)); x_new[i][7]=y_new[i][7]=0;
+        for(var j=0;j<graph.length;j++){
+            x_new[i][graph[j][1]]=x_new[i][graph[j][0]]+prop[j]*(video2x[i][graph[j][1]]-video2x[i][graph[j][0]]);
+            y_new[i][graph[j][1]]=y_new[i][graph[j][0]]+prop[j]*(video2y[i][graph[j][1]]-video2y[i][graph[j][0]]);
+        }
     }
     return [x_new,y_new];
 }
- 
- 
+
 function standardization(array){
-    var average = new Array(array.length);
-    var sdeviation = new Array(array.length);
-    for (var i=0;i<array.length;i++){
-        var s = 0;
-        for (var j=0;j<array[0].length;j++){
-            if(j==9) continue;
-            s+=array[i][j];
-        }
-        average[i] = s/(array[0].length-1);
- 
-        var sd = 0;
-        for (var j=0;j<array[0].length;j++){
-            if(j==9) continue;
-            sd+=(array[i][j]-average[i])**2;
-        }
-        sdeviation[i]=Math.sqrt(sd/array[0].length);
-    }
- 
+    return array;
     var array_standard = new Array(array.length);
     for (var i=0;i<array.length;i++){
-        array_standard[i]= new Array(array[0].length);
+        if(!array[i]){
+            array_standard[i]=null;
+            continue;
+        }
+        var average=0;
         for (var j=0;j<array[0].length;j++){
-            if(j==9) continue;
-            array_standard[i][j]=(array[i][j]-average[i])/sdeviation[i];
+            average+=array[i][j];
+        }
+        average/=(array[0].length);
+
+        var sd=0;
+        for (var j=0;j<array[0].length;j++){
+            sd+=(array[i][j]-average)**2;
+        }
+        sd=Math.sqrt(sd/(array[0].length));
+
+        array_standard[i]=new Array(array[0].length);
+        for (var j=0;j<array[0].length;j++){
+            array_standard[i][j]=(array[i][j]-average)/sd;
         }
     }
     return array_standard;
 }
- 
-function loss(array1x, array1y, array2x, array2y){
-    var a1x = standardization(array1x);
-    var a1y = standardization(array1y);
-    var a2x = standardization(array2x);
-    var a2y = standardization(array2y);
-    var biasx = new Array(a1x.length);
-    var biasy = new Array(a1x.length);
-    var loss = new Array(a1x.length);
-    for(var i=0;i<a1x.length;i++){
-        biasx[i]=(a1x[i][0]-a2x[i][0]);
-        biasy[i]=(a1y[i][0]-a2y[i][0]);
-    }
-    for(var i=0;i<a1x.length;i++){
-        loss[i] = new Array(a1x[0].length);
-        for(var j=0;j<a1x[0].length;j++){
-            if(j==9) continue;
-            a2x[i][j] += biasx[i];
-            a2y[i][j] += biasy[i];
-            loss[i][j] = (a1x[i][j]-a2x[i][j])**2+(a1y[i][j]-a2y[i][j])**2;
+
+function loss(array1x,array1y,array2x,array2y){
+    // var a1x = standardization(array1x), a1y = standardization(array1y), a2x = standardization(array2x), a2y = standardization(array2y);
+    // var biasx = new Array(a1x.length), biasy = new Array(a1x.length), loss = new Array(a1x.length);
+    // for(var i=0;i<a1x.length;i++){
+    //     if(a1x[i]&&a1y[i]&&a2x[i]&&a2y[i]){
+    //         biasx[i]=(a1x[i][0]-a2x[i][0]); biasy[i]=(a1y[i][0]-a2y[i][0]);
+    //     }else biasx[i]=biasy[i]=null;
+    // }
+    // var fail=[];
+    // for(var i=0;i<a1x.length;i++){
+    //     if(biasx[i]==null){
+    //         fail.push(i/a1x.length); loss[i]=null; continue;
+    //     }
+    //     loss[i] = new Array(a1x[0].length);
+    //     for(var j=0;j<a1x[0].length;j++){
+    //         a2x[i][j] += biasx[i]; a2y[i][j] += biasy[i];
+    //         loss[i][j] = (a1x[i][j]-a2x[i][j])**2+(a1y[i][j]-a2y[i][j])**2;
+    //     }
+    // }
+    // return [loss,fail];
+    var loss=new Array(array1x.length);
+    for(var i=0;i<loss.length;i++){
+        loss[i]=new Array(joints);
+        for(var j=0;j<joints;j++){
+            loss[i][j]=(array1x[i][j]-array2x[i][j])**2+(array1y[i][j]-array2y[i][j])**2;
         }
     }
-    return loss;
+    return [loss,null];
 }
- 
- 
-//input image as a1,a2
+
+
 exports.evaluate_loss = function(a1,v1,a2,v2){
-    var b1x,b1y,b2x,b2y;
-    [b1x,b1y] = convert_1darr(a1.frames[0]);
-    [b2x,b2y] = convert_1darr(a2.frames[0]);
+    // input image as a1,a2
+    if(a2.frames[0].persons.length==0) return {error: "Detect no person in the picture."};
+    if(a1.frames[0].persons.length==0) return {error: "Detect no person in the picture."};
+    var [b1x,b1y] = convert_1darr(a1.frames[0]);
+    var [b2x,b2y] = convert_1darr(a2.frames[0]);
 
     var prop = pro(b1x,b1y,b2x,b2y);
+    if(!prop) return {error: "Can't find the whole body."};
 
     // trim frames[] to same size
     if(v1.frames.length>v2.frames.length)
-        v1.frames.slice(0,v2.frames.length);
+        v1.frames=v1.frames.slice(0,v2.frames.length);
     if(v1.frames.length<v2.frames.length)
-        v2.frames.slice(0,v1.frames.length);
+        v2.frames=v2.frames.slice(0,v1.frames.length);
 
     // input video as v1,v2
-    var v1x,v1y,v2x,v2y;
-    [v1x,v1y] = convert_2darr(v1.frames);
-    [v2x,v2y] = convert_2darr(v2.frames);
+    var [v1x,v1y] = convert_2darr(v1.frames);
+    var [v2x,v2y] = convert_2darr(v2.frames);
+    var [v1x_new,v1y_new] = movepoint(v1x,v1y);
+    var [v2x_new,v2y_new] = movepoint(v2x,v2y,prop);
+    var [res_loss,unprocessable] = loss(v1x_new,v1y_new,v2x_new,v2y_new);
 
-    [v2x_new,v2y_new] = movepoint(prop,v2x,v2y);
-
-    var res_loss = loss(v1x,v1y,v2x_new,v2y_new);
-
-    var tot=0;
+    var tot=0,cnt=0;
     for(var i=0;i<res_loss.length;i++){
         for(var j=0;j<res_loss[0].length;j++){
-            if(j==9) continue;
-            tot+=res_loss[i][j];
+            if(j!=7&&!isNaN(res_loss[i][j])) tot+=res_loss[i][j],cnt++;
         }
     }
-    return tot;
+    if(cnt==0) return {error: "Failed to process the video."}
+    return {loss: tot/cnt};
 }
