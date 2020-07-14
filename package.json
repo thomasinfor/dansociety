@@ -24,6 +24,7 @@
     "child-process-promise": "^2.2.1",
     "express": "^4.17.1",
     "ffmpeg": "0.0.4",
+    "fluent-ffmpeg": "^2.1.2",
     "formidable": "^1.2.2",
     "mongodb": "^3.5.9",
     "mv": "^2.1.1"

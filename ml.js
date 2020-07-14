@@ -1,3 +1,5 @@
+const MIN=(a,b)=>a<b?a:b;
+const MAX=(a,b)=>a>b?a:b;
 const joints=17;
 function largest_person(x){
     if(x.length==0) return null;
@@ -20,7 +22,8 @@ function convert_1darr(a){
         if(origin.pose2d.joints[i*2]<0||origin.pose2d.joints[i*2+1]<0){
             arrx.push(NaN); arry.push(NaN);
         }else{
-            arrx.push(a.width*origin.pose2d.joints[i*2]); arry.push(a.height*origin.pose2d.joints[i*2+1]);
+            arrx.push(100*origin.pose2d.joints[i*2]/origin.pose2d.bbox.width);
+            arry.push(100*origin.pose2d.joints[i*2+1]/origin.pose2d.bbox.height);
         }
     }
     return [arrx,arry];
@@ -95,38 +98,9 @@ function standardization(array){
     return array_standard;
 }
 
-function loss(array1x,array1y,array2x,array2y){
-    // var a1x = standardization(array1x), a1y = standardization(array1y), a2x = standardization(array2x), a2y = standardization(array2y);
-    // var biasx = new Array(a1x.length), biasy = new Array(a1x.length), loss = new Array(a1x.length);
-    // for(var i=0;i<a1x.length;i++){
-    //     if(a1x[i]&&a1y[i]&&a2x[i]&&a2y[i]){
-    //         biasx[i]=(a1x[i][0]-a2x[i][0]); biasy[i]=(a1y[i][0]-a2y[i][0]);
-    //     }else biasx[i]=biasy[i]=null;
-    // }
-    // var fail=[];
-    // for(var i=0;i<a1x.length;i++){
-    //     if(biasx[i]==null){
-    //         fail.push(i/a1x.length); loss[i]=null; continue;
-    //     }
-    //     loss[i] = new Array(a1x[0].length);
-    //     for(var j=0;j<a1x[0].length;j++){
-    //         a2x[i][j] += biasx[i]; a2y[i][j] += biasy[i];
-    //         loss[i][j] = (a1x[i][j]-a2x[i][j])**2+(a1y[i][j]-a2y[i][j])**2;
-    //     }
-    // }
-    // return [loss,fail];
-    var loss=new Array(array1x.length);
-    for(var i=0;i<loss.length;i++){
-        loss[i]=new Array(joints);
-        for(var j=0;j<joints;j++){
-            loss[i][j]=(array1x[i][j]-array2x[i][j])**2+(array1y[i][j]-array2y[i][j])**2;
-        }
-    }
-    return [loss,null];
-}
 
 
-exports.evaluate_loss = function(a1,v1,a2,v2){
+function pose(a1,v1,a2,v2){
     // input image as a1,a2
     if(a2.frames[0].persons.length==0) return {error: "Detect no person in the picture."};
     if(a1.frames[0].persons.length==0) return {error: "Detect no person in the picture."};
@@ -136,25 +110,68 @@ exports.evaluate_loss = function(a1,v1,a2,v2){
     var prop = pro(b1x,b1y,b2x,b2y);
     if(!prop) return {error: "Can't find the whole body."};
 
-    // trim frames[] to same size
-    if(v1.frames.length>v2.frames.length)
-        v1.frames=v1.frames.slice(0,v2.frames.length);
-    if(v1.frames.length<v2.frames.length)
-        v2.frames=v2.frames.slice(0,v1.frames.length);
-
     // input video as v1,v2
     var [v1x,v1y] = convert_2darr(v1.frames);
     var [v2x,v2y] = convert_2darr(v2.frames);
+
     var [v1x_new,v1y_new] = movepoint(v1x,v1y);
     var [v2x_new,v2y_new] = movepoint(v2x,v2y,prop);
-    var [res_loss,unprocessable] = loss(v1x_new,v1y_new,v2x_new,v2y_new);
 
-    var tot=0,cnt=0;
-    for(var i=0;i<res_loss.length;i++){
-        for(var j=0;j<res_loss[0].length;j++){
-            if(j!=7&&!isNaN(res_loss[i][j])) tot+=res_loss[i][j],cnt++;
+    var move=recalibrate({standard: [v1x_new,v1y_new],personal: [v2x_new,v2y_new]});
+    if(move>0){
+        v1x_new=Array(move).fill(empty).concat(v1x_new);
+        v1y_new=Array(move).fill(empty).concat(v1y_new);
+    }else if(move<0){
+        v1x_new=v1x_new.slice(-move);
+        v1y_new=v1y_new.slice(-move);
+    }
+    if(v1x_new.length>v2x_new.length){
+        v1x_new=v1x_new.slice(0,v2x_new.length);
+        v1y_new=v1y_new.slice(0,v2y_new.length);
+    }
+    return {standard: [v1x_new,v1y_new],personal: [v2x_new,v2y_new]};
+}
+function delta4(array1x,array1y,array2x,array2y){
+    var loss=new Array(MIN(array1x.length,array2x.length));
+    for(var i=0;i<loss.length;i++){
+        loss[i]=new Array(joints);
+        for(var j=0;j<joints;j++){
+            loss[i][j]=[(array1x[i][j]-array2x[i][j]),(array1y[i][j]-array2y[i][j])];
         }
     }
-    if(cnt==0) return {error: "Failed to process the video."}
-    return {loss: tot/cnt};
+    return loss;
 }
+function delta1(points){return delta4(points.standard[0],points.standard[1],points.personal[0],points.personal[1]);}
+function total_loss(loss){
+    var tot=0,cnt=0;
+    for(var i=0;i<loss.length;i++){
+        for(var j=0;j<loss[0].length;j++){
+            if(j!=7&&!isNaN(loss[i][j][0])) tot+=loss[i][j][0]**2+loss[i][j][1]**2,cnt++;
+        }
+    }
+    return tot/cnt;
+}
+function recalibrate(points){
+    var min=[0,total_loss(delta1(points))],range=100,x;
+    var rec=new Array(range*2+1);
+    rec[30]=min[1];
+    for(var i=1;i<=range;i++){
+        x=total_loss(delta4(points.standard[0].slice(i),points.standard[1].slice(i),points.personal[0],points.personal[1]));
+        if(x<min[1]) min=[-i,x];
+        rec[30-i]=x;
+        x=total_loss(delta4(points.standard[0],points.standard[1],points.personal[0].slice(i),points.personal[1].slice(i)));
+        if(x<min[1]) min=[i,x];
+        rec[30+i]=x;
+    }
+    return min[0];
+}
+async function evaluate(a1,v1,a2,v2){
+    var point=await pose(a1,v1,a2,v2);
+    return point;
+}
+
+exports.delta1=delta1;
+exports.delta4=delta4;
+exports.total_loss=total_loss;
+exports.pose=pose;
+exports.evaluate=evaluate;

@@ -8,7 +8,7 @@ const fs=require('fs');
 const util=require('util');
 const mv=util.promisify(require('mv'));
 const path=require('path');
-const ffmpeg=require('ffmpeg');
+const ffmpeg=require('fluent-ffmpeg');
 const execute=require('child-process-promise').exec;
 
 const apikey='e0cae3a6-2cc8-4b2f-a3a2-2882205deac3';
@@ -17,11 +17,8 @@ const dburl="mongodb://localhost:27017/";
 const port=2003;
 const app=new express();
 
-const log=(new console.Console({
-  stdout: fs.createWriteStream('./log/stdout.log',{flags:'a'}),
-  stderr: fs.createWriteStream('./log/stderr.log',{flags:'a'})
-})).log;
-// const log=console.log;
+// const log=(new console.Console({stdout: fs.createWriteStream('./log/stdout.log',{flags:'a'}),stderr: fs.createWriteStream('./log/stderr.log',{flags:'a'})})).log;
+const log=console.log;
 
 // mongo.connect(dburl,function(err,db){
 //   if(err) throw err;
@@ -32,6 +29,7 @@ const log=(new console.Console({
 //     db.close();
 //   });
 // });
+const str=JSON.stringify;
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:true}));
 
@@ -57,16 +55,15 @@ function content(x){x=String(x);return x.slice(0,x.length-3);}
 function status(x){x=String(x);return x.slice(x.length-3);}
 function moveVideo(oldpath,newpath){
   log(newpath);
-  var video = new ffmpeg(oldpath);
-  var ret=new Promise((resolve,reject)=>{
-    video.then(video=>{
-      return video
-      .setVideoFrameRate(30)
-      .setVideoFormat('mp4')
-      .save(newpath,(err,file)=>{resolve(file);});
-    });
+  return new Promise((resolve,reject)=>{
+    ffmpeg(oldpath)
+      .fps(30).format('mp4').withVideoFilter('hflip').save(newpath)
+      .on('error',(err,stdout,stderr)=>{
+        log(err);
+      }).on('end',(stdout,stderr)=>{
+        resolve(newpath);
+      });
   });
-  return ret;
 }
 function moveImg(oldpath,newpath){
   log(newpath);
@@ -156,7 +153,7 @@ function pose(p){
   if(!fs.existsSync(jsonp)){
     return submitWrnch(p).then(getResultWrnch).then(res=>{
       if(res){
-        fs.writeFile(jsonp,JSON.stringify(res,null,2),err=>{
+        fs.writeFile(jsonp,str(res,null,2),err=>{
           if(err) throw err;
           else log(`wrote ${jsonp}`);
         });
@@ -177,7 +174,7 @@ function evaluate(p1,v1,p2,v2){
   log(p1,v1,p2,v2);
   return Promise.all([pose(p1),pose(v1),pose(p2),pose(v2)]).then(values=>{
     if(values[0]==null) return null;
-    return algo.evaluate_loss(values[0],values[1],values[2],values[3]);
+    return algo.evaluate(values[0],values[1],values[2],values[3]);
   }).catch(err=>{
     log(`evaluate\n${p1}\n${v1}\n${p2}\n${v2}\nERROR: ${err}`);
   });
@@ -198,9 +195,8 @@ app.post('/demo/evaluate',(req,res)=>{
           './public/demo/demo-video.mp4',
           pimg,pvideo
         );
-      }).then(pts=>{
-        log(pts);
-        res.end(JSON.stringify(pts));
+      }).then(points=>{
+        res.end(str(algo.total_loss(algo.delta1(points))));
         log('post evaluate end');
       }).catch(e=>{
         log(e);
@@ -211,8 +207,22 @@ app.post('/demo/evaluate',(req,res)=>{
 log((new Date()).toLocaleString());
 updateToken();
 // setTimeout(()=>{evaluate(
-//   './public/demo/demo-pict.png',
-//   './public/demo/demo-video.mp4',
+//   './data/demo-pict.png',
+//   './data/demo-video.mp4',
+//   './data/1594282117769.png',
+//   './data/1594282140828.mp4'
+// ).then(pts=>{log(2,pts);});},2000);
+// setTimeout(()=>{evaluate(
+//   './data/demo-pict.png',
+//   './data/demo-video.mp4',
 //   './data/1594461887480.png',
 //   './data/1594462292424.mp4'
-// ).then(pts=>{log(pts);});},2000);
+// ).then(pts=>{log(1,pts);});},2000);
+app.get('/test',(req,res)=>{
+  evaluate(
+    './data/demo-pict.png',
+    './data/demo-video.mp4',
+    './data/1594461887480.png',
+    './data/1594462292424.mp4'
+  ).then(points=>{res.end(str(algo.total_loss(algo.delta1(points))));});
+});
