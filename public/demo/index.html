@@ -99,12 +99,14 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
     </div>
     <div class="page" id="estimate">
       <div class="step">STEP 4<span class="description">點選評分鍵評分，並邀請你的好友來一同競賽！</span></div>
-      <div class="button" id="estimate-button">evaluate</div>
+      <div class="button" id="estimate-button">Evaluate</div>
       <div id="score"></div>
     </div>
   </div>
   <script>
+    var pending=false;
     function estimate(){
+      if(pending) return;
       var err=[];
       if(formdata.get('userImg')=='none') err.push('image');
       if(formdata.get('userVideo')=='none') err.push('video');
@@ -112,15 +114,27 @@ img.flip{-webkit-transform: scaleX(-1);transform: scaleX(-1);}
         window.alert(`Missing ${err.join(' and ')} !\nPlease finish the recording.`);
         return;
       }
-      formdata.set('test','so hard');
+      pending=true;
       var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange=function() {
-        if(this.readyState==4&&this.status==200){
-          document.getElementById("score").innerHTML=this.responseText;
-          console.log(this.responseText);
+      xhttp.onreadystatechange=function(){
+        if(this.readyState==1){
+          document.getElementById('estimate-button').innerHTML=`<i class="fa fa-spinner fa-spin"></i> Loading...`;
+          document.getElementById("score").innerHTML='';
+        }
+        if(this.readyState==4){
+          pending=false;
+          document.getElementById('estimate-button').innerHTML='Evaluate';
+          if(this.status==200){
+            document.getElementById("score").innerHTML=this.responseText==null?'Failed':this.responseText;
+          }else{
+            document.getElementById("score").innerHTML='Failed';
+          }
         }
       };
+      xhttp.timeout=30*1000;
+      xhttp.ontimeout=e=>{pending=false;console.log(e);document.getElementById("score").innerHTML='Failed';};
       xhttp.open('POST','./evaluate',true);
+      // xhttp.open('POST','./evaluate',true);
       xhttp.send(formdata);
     }
     document.getElementById('estimate-button').onclick=estimate;

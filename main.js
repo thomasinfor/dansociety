@@ -17,8 +17,8 @@ const dburl="mongodb://localhost:27017/";
 const port=2003;
 const app=new express();
 
-// const log=(new console.Console({stdout: fs.createWriteStream('./log/stdout.log',{flags:'a'}),stderr: fs.createWriteStream('./log/stderr.log',{flags:'a'})})).log;
-const log=console.log;
+const log=(new console.Console({stdout: fs.createWriteStream('./log/stdout.log',{flags:'a'}),stderr: fs.createWriteStream('./log/stderr.log',{flags:'a'})})).log;
+// const log=console.log;
 
 // mongo.connect(dburl,function(err,db){
 //   if(err) throw err;
@@ -211,18 +211,20 @@ updateToken();
 //   './data/demo-video.mp4',
 //   './data/1594282117769.png',
 //   './data/1594282140828.mp4'
-// ).then(pts=>{log(2,pts);});},2000);
+// ).then(pts=>{log(str(algo.total_loss(algo.delta1(pts)))}));},2000);
 // setTimeout(()=>{evaluate(
 //   './data/demo-pict.png',
 //   './data/demo-video.mp4',
 //   './data/1594461887480.png',
 //   './data/1594462292424.mp4'
-// ).then(pts=>{log(1,pts);});},2000);
+// ).then(pts=>{log(str(algo.total_loss(algo.delta1(pts)))}));},2000);
 app.get('/test',(req,res)=>{
+  setTimeout(()=>{
   evaluate(
     './data/demo-pict.png',
     './data/demo-video.mp4',
-    './data/1594461887480.png',
-    './data/1594462292424.mp4'
+    './data/1594282117769.png',
+    './data/1594282140828.mp4'
   ).then(points=>{res.end(str(algo.total_loss(algo.delta1(points))));});
+  },3000);
 });
